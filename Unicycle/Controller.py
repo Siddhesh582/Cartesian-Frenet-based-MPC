@@ -8,11 +8,13 @@ from Unicycle import Unicycle
 class FrenetCartesianMPC:
     def __init__(self, ref_path: ReferencePathParameters, unicycle_model: Unicycle):
         """
-        Initialize the MPC controller for unicycle model in Frenet-Cartesian frames
+        MPC Controller
         
         Args:
             ref_path: ReferencePath object => contains reference path information
             unicycle_model: Unicycle model object
+
+        For clearity, => means implies, not greater than equal to
         """
         # Model parameters
         self.dt = 0.1  # Sampling time
@@ -41,7 +43,7 @@ class FrenetCartesianMPC:
             self.n_max = 2.0
             self.n_min = -2.0
 
-        # setting up the saftey circle for unicycle 
+        # saftey circle for unicycle
         self.circle_radius = self.unicycle.uni_radius
         
         # getting default obstacles setup for collision avoidance
@@ -58,16 +60,16 @@ class FrenetCartesianMPC:
         
         self.v_ref = 0.8      # to ensure non zero velocity due to control cost
 
-        # Slack variable penalty weights (adding these lines fixes the error)
-        self.obs_slack_weight = 1000.0    # Obstacle avoidance slack penalty
-        self.curv_slack_weight = 100.0    # Curvature constraint slack penalty
-        self.lat_slack_weight = 500.0     # Lateral deviation slack penalty
+        # Slack variable penalty weights
+        self.obs_slack_weight = 1000.0    # obstacle avoidance slack penalty
+        self.curv_slack_weight = 100.0    # curvature constraint slack penalty
+        self.lat_slack_weight = 500.0     # lateral deviation slack penalty
 
-        # Build the MPC solver
+    
         self.NMPC_setup()
     
     def NMPC_setup(self):
-        ''' Setting up parameters '''
+        ''' parameters '''
         self.opti = ca.Opti()  # CasADi Opti class instance
         
         # state variables over the prediction horizon
@@ -194,22 +196,21 @@ class FrenetCartesianMPC:
             self.opti.subject_to(self.omega_min <= omega[k])
             self.opti.subject_to(omega[k] <= self.omega_max)
         
-        # ---- Soft obstacle avoidance constraints ----
-        # Add slack variables for obstacle avoidance
+        ''' Soft obstacle avoidance constraints '''
+        # obstacle avoidance slack variables
         obs_slack_vars = []
         if self.obstacles and self.obstacle_circles:
             for k in range(1, self.N+1):
                 for _ in self.obstacle_circles:
-                    # Create a slack variable for each obstacle at each time step
+                    # slack variable for each obstacle at each time step
                     slack = self.opti.variable()
-                    # Slack should be non-negative
+                    # non negative slack
                     self.opti.subject_to(slack >= 0)
                     obs_slack_vars.append(slack)
                     
-                    # Add penalty to cost function
+                    # penalty
                     cost += self.obs_slack_weight * slack
         
-        # Add softened obstacle avoidance constraints
         slack_idx = 0
         if self.obstacles and self.obstacle_circles:
             for k in range(1, self.N+1):
@@ -217,13 +218,13 @@ class FrenetCartesianMPC:
                     obs_x, obs_y = obs_circle['center']
                     obs_radius = obs_circle['radius']
                     
-                    # Calculate distance between vehicle and obstacle
+                    # distance between vehicle and obstacle
                     dist = ca.sqrt((x[k] - obs_x)**2 + (y[k] - obs_y)**2)
                     
-                    # Minimum required distance: sum of radii plus safety margin
+                    # minimum required distance => sum of radii plus safety margin
                     min_dist = self.circle_radius + obs_radius + 0.05
                     
-                    # Add softened constraint: distance >= minimum distance - slack
+                    # softened constraint: distance >= minimum distance - slack
                     self.opti.subject_to(dist >= min_dist - obs_slack_vars[slack_idx])
                     
                     slack_idx += 1
@@ -241,8 +242,8 @@ class FrenetCartesianMPC:
             'ipopt.print_level': 0,
             'ipopt.sb': 'yes',
             'print_time': 0,
-            'ipopt.max_iter': 500,  # Increase max iterations
-            'ipopt.tol': 1e-4       # Slightly relax tolerance for faster convergence
+            'ipopt.max_iter': 500,  # max iterations
+            'ipopt.tol': 1e-4       # slightly relax tolerance for faster convergence
         }
         self.opti.solver('ipopt', opts)   # IPOPT => gradient based NMPC solver 
     
@@ -265,16 +266,16 @@ class FrenetCartesianMPC:
         dy = v * ca.sin(theta)
         dtheta = omega
         
-        # Get path curvature and heading
+        # path curvature and heading
         kappa = self._casadi_path_curvature(s)
         path_heading = self._casadi_path_heading(s)
         
-        # Calculate beta (heading difference to path)
+        # beta (heading difference to path)
         beta = theta - path_heading
         
         # Frenet dynamics - adapted from the Unicycle class motion_model_frenet
         denom = 1 - n * kappa
-        # Add small regularization to prevent division by zero
+        # small regularization to prevent division by zero
         denom = ca.if_else(ca.fabs(denom) < 1e-6, 1e-6 * ca.sign(denom), denom)
         
         ds = v * ca.cos(beta) / denom
@@ -284,22 +285,18 @@ class FrenetCartesianMPC:
     
     def _casadi_path_curvature(self, s):
         """
-        Create a CasADi function for path curvature interpolation
-        Using a simplified approximation for CasADi compatibility
+        CasADi uses computation graph based method....hence,
+        CasADi function for path curvature interpolation using a simplified approximation for CasADi compatibility
         """
-        # This is a simplified approximation - in a real implementation,
-        # you would create a more accurate CasADi interpolation function
-        # based on your reference path data
+        # simplified approximation
         s_max = self.ref_path.last_s_val
         return 0.05 * ca.sin(0.1 * s)
     
     def _casadi_path_heading(self, s):
         """
-        Create a CasADi function for path heading interpolation
-        Using a simplified approximation for CasADi compatibility
+        CasADi function for path heading interpolation using a simplified approximation for CasADi compatibility
         """
-        # We need to approximate the heading function from ReferencePathParameters
-        # for CasADi compatibility
+        # approximate the heading function from ReferencePathParameters for CasADi compatibility
         return ca.arctan2(0.05 * ca.cos(0.1 * s), 1.0)
     
     def set_reference_velocity(self, v_ref):
@@ -307,7 +304,7 @@ class FrenetCartesianMPC:
     
     def solve(self, current_state, s_ref):
         """
-        Solve the MPC problem for the current state
+        MPC problem for the current state
         
         Args:
             current_state: Current state [x, y, theta, s, n]
@@ -316,30 +313,30 @@ class FrenetCartesianMPC:
         Returns:
             Optimal control input [v, omega]
         """
-        # Create a speed ramp-up for smoother starts
+        # speed ramp-up for smoother starts
         current_velocity = np.linalg.norm(current_state[:2])
         if current_velocity < 0.1:  # If nearly stopped
-            # Create a gradually increasing reference velocity
-            self.v_ref = min(0.8, current_velocity + 0.05)  # Gradually increase to max 0.8
+            # gradually increasing reference velocity to max 0.8
+            self.v_ref = min(0.8, current_velocity + 0.05)  
         else:
-            self.v_ref = 0.8  # Normal reference velocity
+            self.v_ref = 0.8  
             
-        # Set the initial state parameter
+        # initial state parameter
         self.opti.set_value(self.X0, current_state)
         
-        # Set the reference trajectory parameter
+        # reference trajectory parameter
         self.opti.set_value(self.S_ref, s_ref)
         
-        # Solve the optimization problem
+        # optimization problem
         try:
             sol = self.opti.solve()
-            # Extract the first control action
+            # extract the first control action
             u_optimal = sol.value(self.U)[:, 0]
             return u_optimal, sol.value(self.X)
         except Exception as e:
             print(f"Error solving MPC problem: {str(e)}")
             
-            # Check if any obstacles are nearby
+            # check if any obstacles are nearby
             x, y = current_state[0], current_state[1]
             for i, obs in enumerate(self.obstacles):
                 if 'center' in obs and 'radius' in obs:
@@ -352,7 +349,7 @@ class FrenetCartesianMPC:
     
     def set_obstacles(self, obstacles):
         """
-        Set obstacles for collision avoidance using a single circle per obstacle
+        collision avoidance obstacles with single circle per obstacle
         
         Args:
             obstacles: List of obstacle dictionaries with center, width, height
@@ -365,13 +362,13 @@ class FrenetCartesianMPC:
         else:
             self.obstacles = obstacles
         
-        # Convert obstacles to circle representation
+        # obstacles to circle representation
         self.obstacle_circles = []
         
         for obstacle in self.obstacles:
-            # Keep obstacles that already have a radius
+            # obstacles that already have a radius
             if 'radius' in obstacle:
                 self.obstacle_circles.append(obstacle)
         
-        # Rebuild the MPC problem with new obstacles
+        # rebuild the MPC problem with new obstacles
         self.NMPC_setup()

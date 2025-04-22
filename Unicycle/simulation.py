@@ -63,9 +63,9 @@ def simulate_system(mpc_controller: FrenetCartesianMPC, ref_path: ReferencePathP
                 
         if u[0] == 0.0 and u[1] == 0.0:
             # backup controller
-            print(f"Using fallback controller at step {i}")
-            v_fallback = mpc_controller.v_ref 
-            u = np.array([v_fallback, 0.0])  # Forward movement, no turning
+            print(f"Using backup controller at step {i}")
+            v_backup = mpc_controller.v_ref 
+            u = np.array([v_backup, 0.0])  # Forward movement, no turning
         
         times[i] = time.time() - t_start
         
@@ -101,7 +101,7 @@ def simulate_system(mpc_controller: FrenetCartesianMPC, ref_path: ReferencePathP
     return states, controls, times, predicted_trajectories
 
 def plot_simulation_results(ref_path, states, controls, unicycle_model):
-    """Plot simulation results with visualization of covering circles"""
+    """simulation results with visualization of covering circles"""
     # Create figure
     plt.figure(figsize=(15, 10))
     

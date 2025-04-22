@@ -159,14 +159,14 @@ class Unicycle:
     
     def check_collision(self, state, obstacles):
         """
-        Check if the unicycle collides with any obstacles
+        collision check with any obstacles
         
         Args:
             state: Cartesian state [x, y, theta]
-            obstacles: List of obstacle dictionaries with center and radius
+            obstacles: list of obstacle dictionaries with center and radius
             
         Returns:
-            collision: Boolean indicating collision
+            collision: boolean indicating collision
         """
         uni_circle = self.unicycle_collision_circle(state)
         uni_center = np.array(uni_circle['center'])
@@ -194,7 +194,7 @@ class Unicycle:
     
     def plot_vehicle(self, state, ax=None, alpha=1.0):
         """
-        Plot a simple representation of the unicycle vehicle
+        representation of the unicycle vehicle
         
         Args:
             state: Vehicle state [x, y, theta]

@@ -15,13 +15,13 @@ from Controller import FrenetCartesianMPC
 from simulation import simulate_system, plot_simulation_results
 
 def main():
-    # Create a reference path with sinusoidal curve
+    # values for reference path with sinusoidal curve
     s_vals = np.linspace(0, 100, 2000)
     x_vals = s_vals
     y_vals = 1 * np.sin(0.05 * s_vals)
     lane_width = 15.0
     
-    # Create reference path
+    # generate reference path
     ref_path = ReferencePathParameters(s_vals, x_vals, y_vals, lane_width=lane_width)
     
     # default obstacles
@@ -41,7 +41,7 @@ def main():
     
     mpc_controller.set_reference_velocity(0.8)
     
-    # Run simulation
+    ''' Run simulation '''
     simulation_steps = 600
     print(f"Running simulation for {simulation_steps} steps...")
     start_time = time.time()
@@ -51,20 +51,20 @@ def main():
     total_time = time.time() - start_time
     print(f"Simulation completed in {total_time:.2f} seconds")
     
-    # Plot simulation results
+    # simulation results
     plot_simulation_results(ref_path, states, controls, unicycle)
     
-    # Additional plots
+    # additional plots
     plot_additional_metrics(states, controls, solve_times)
     
-    # Plot final path following with obstacles
+    # final path following with obstacles
     plot_final_path(ref_path, states, obstacles, unicycle)
 
 def plot_additional_metrics(states, controls, solve_times):
-    """Plot additional useful metrics for analyzing the controller performance"""
+    """additional metrics for analyzing the controller performance"""
     plt.figure(figsize=(15, 10))
     
-    # Plot velocity profile
+    # linear velocity changes
     ax1 = plt.subplot(2, 2, 1)
     velocities = controls[:, 0]
     ax1.plot(states[:-1, 3], velocities, 'b-', linewidth=2)
@@ -73,7 +73,7 @@ def plot_additional_metrics(states, controls, solve_times):
     ax1.set_title('Velocity Profile Along Path')
     ax1.grid(True)
     
-    # Plot angular velocity profile
+    # angular velocity changes
     ax2 = plt.subplot(2, 2, 2)
     angular_velocities = controls[:, 1]
     ax2.plot(states[:-1, 3], angular_velocities, 'g-', linewidth=2)
@@ -82,7 +82,7 @@ def plot_additional_metrics(states, controls, solve_times):
     ax2.set_title('Angular Velocity Profile Along Path')
     ax2.grid(True)
     
-    # Plot solver times
+    # solver times
     ax3 = plt.subplot(2, 2, 3)
     ax3.plot(np.arange(len(solve_times)), solve_times * 1000, 'm-', linewidth=2)
     ax3.set_xlabel('Simulation Step')
@@ -90,15 +90,15 @@ def plot_additional_metrics(states, controls, solve_times):
     ax3.set_title('MPC Solver Times')
     ax3.grid(True)
     
-    # Plot heading error
+    # heading error
     ax4 = plt.subplot(2, 2, 4)
     heading_errors = []
     for i in range(len(states)):
         s = states[i, 3]
         theta = states[i, 2]
-        path_heading = np.arctan2(0.05 * np.cos(0.1 * s), 1.0)  # Approximate heading function
+        path_heading = np.arctan2(0.05 * np.cos(0.1 * s), 1.0)  # approximate heading function
         heading_error = np.abs(theta - path_heading)
-        heading_error = np.minimum(heading_error, 2*np.pi - heading_error)  # Take smaller angle
+        heading_error = np.minimum(heading_error, 2*np.pi - heading_error)  
         heading_errors.append(heading_error)
     
     ax4.plot(states[:, 3], heading_errors, 'r-', linewidth=2)
@@ -111,28 +111,26 @@ def plot_additional_metrics(states, controls, solve_times):
     plt.show()
 
 def plot_final_path(ref_path, states, obstacles, unicycle):
-    """Plot the final path following with obstacles and vehicle position at several points"""
     fig, ax = plt.subplots(figsize=(15, 6))
     
-    # Plot road
+    # road
     ref_path.plot_curvy_road(obstacles=obstacles, show=False, ax=ax)
     
-    # Plot the vehicle trajectory
+    # vehicle trajectory
     ax.plot(states[:, 0], states[:, 1], 'r-', linewidth=2, label='Vehicle Trajectory')
     
-    # Plot the vehicle at several points along the trajectory
+    # vehicle at several points along the trajectory
     num_points = 10
     indices = np.linspace(0, len(states)-1, num_points).astype(int)
     
     for idx in indices:
-        # Plot vehicle
+        # vehicle
         x, y, theta = states[idx, 0], states[idx, 1], states[idx, 2]
         
-        # Simple car shape using a rectangle
+        # rectangle car shaoe
         car_length = unicycle.length
         car_width = unicycle.width
         
-        # Calculate corner positions of the car rectangle
         corners = np.array([
             [-car_length/2, -car_width/2],
             [car_length/2, -car_width/2],
@@ -140,7 +138,7 @@ def plot_final_path(ref_path, states, obstacles, unicycle):
             [-car_length/2, car_width/2]
         ])
         
-        # Rotate corners based on vehicle heading
+        # rotate corners based on vehicle heading
         R = np.array([
             [np.cos(theta), -np.sin(theta)],
             [np.sin(theta), np.cos(theta)]
@@ -148,14 +146,12 @@ def plot_final_path(ref_path, states, obstacles, unicycle):
         
         rotated_corners = np.array([R @ corner for corner in corners])
         
-        # Translate corners to vehicle position
+        # translate corners to vehicle position
         translated_corners = rotated_corners + np.array([x, y])
-        
-        # Draw the vehicle
+
         car_polygon = plt.Polygon(translated_corners, fill=True, color='g', alpha=0.5)
         ax.add_patch(car_polygon)
         
-        # Add direction indicator (front of vehicle)
         front_x = x + 0.7 * car_length/2 * np.cos(theta)
         front_y = y + 0.7 * car_length/2 * np.sin(theta)
         ax.plot([x, front_x], [y, front_y], 'r-', linewidth=1.5)
