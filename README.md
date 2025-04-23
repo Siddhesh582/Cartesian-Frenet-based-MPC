@@ -5,8 +5,7 @@ This project presents the implementation of a Frenet–Cartesian NMPC framework 
 
 Instead of a tricycle model, this implementation uses a **unicycle kinematic model**, and focuses on achieving accurate trajectory tracking and collision avoidance in structured environments with static obstacles.4
 
-**Updated Simulation Video**
-An updated simulation video showcasing the unicycle following the reference path and avoiding obstacles can be viewed here: https://youtu.be/Ds_wo5R4es8?si=OPO-AkcHl5R4es8
+**Updated Simulation Video** : Showcasing the unicycle following the reference path and avoiding obstacles can be viewed here https://youtu.be/Ds_wo5R4es8?si=OPO-AkcHl5R4es8
 
 ## 🚀 Project Features
 
