@@ -133,35 +133,3 @@ class TricycleKinematics:
 
         return np.array([s_dot, n_dot, beta_dot, v_dot, alpha_dot])
 
-
-##### USAGE EXAMPLE ##########
-
-
-# Instantiate the model
-trike = TricycleKinematics()
-
-# Define sample state: [x, y, φ, v, α]
-state = np.array([0.0, 0.0, np.pi/4, 0.5, np.pi/12])
-
-# Define control input: [a, ω]
-control = np.array([0.1, 0.05])
-
-# Call motion model
-t = 0.0  # time (not used here)
-state_dot = trike.motion_model(t, state, control)
-
-# Print the results
-print("State:")
-print(f"x = {state[0]:.2f}, y = {state[1]:.2f}, φ = {state[2]:.2f}, v = {state[3]:.2f}, α = {state[4]:.2f}")
-print("\nState Derivatives:")
-print(f"ẋ = {state_dot[0]:.4f}, ẏ = {state_dot[1]:.4f}, φ̇ = {state_dot[2]:.4f}, v̇ = {state_dot[3]:.4f}, α̇ = {state_dot[4]:.4f}")
-
-ref_path = lambda s: np.array([s, 0.0])
-ref_heading = lambda s: 0.0
-s_samples = np.linspace(0, 20, 1000)
-
-state = np.array([5.2, 1.0, np.pi/6])
-frenet_state = trike.cartesian_to_frenet(state, ref_path, ref_heading, s_samples)
-
-print(f"Frenet State: s = {frenet_state[0]:.2f}, n = {frenet_state[1]:.2f}, beta = {frenet_state[2]:.2f}")
-
