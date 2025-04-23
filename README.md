@@ -36,6 +36,6 @@ Instead of a tricycle model, this implementation uses a **unicycle kinematic mod
 
 ---
 
-👤 Author
-**Siddhesh Shingate** — Robotics Engineer (M.S. Candidate)
+👤 Author  
+**Siddhesh Shingate** — Robotics Engineer (M.S. Candidate)  
 For academic inquiries or collaborations, feel free to reach out! 
