@@ -1,4 +1,4 @@
-# MPC Path Tracking with Obstacle Avoidance
+# Cartesian-Frenet Based Nonlinear Model Predictive Controller
 
 Warehouse robots and factory AGVs follow fixed routes but need to avoid unexpected obstacles — forklifts, pallets, people — without stopping. This project solves path tracking and obstacle avoidance in a single optimization, computing optimal controls at 10 Hz.
 
