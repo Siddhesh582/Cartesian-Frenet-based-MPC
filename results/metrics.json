@@ -1,0 +1,47 @@
+{
+  "tracking": {
+    "lateral_rms_cm": 49.55412996124646,
+    "lateral_max_cm": 152.83649032207296,
+    "lateral_mean_cm": 29.62065845992799,
+    "heading_rms_deg": 21.433060010869283,
+    "heading_max_deg": 72.3069646300491
+  },
+  "safety": {
+    "collision_free": true,
+    "num_collisions": 0,
+    "min_clearance_cm": 16.970273102289248,
+    "mean_clearance_cm": 2470.632364026215,
+    "clearance_std_cm": 1527.8551234995941
+  },
+  "control": {
+    "velocity_mean_mps": 0.8779509444966173,
+    "velocity_std_mps": 0.45575809232642805,
+    "accel_max_mps2": 0.49996868052697097,
+    "accel_rms_mps2": 0.18415247599636914,
+    "jerk_max_mps3": 2.9999995314417993,
+    "jerk_rms_mps3": 0.3054464124606479,
+    "steering_max_dps": 48.466256464683426,
+    "steering_rms_dps": 17.77152954346005
+  },
+  "computation": {
+    "solve_mean_ms": 51.88620475636776,
+    "solve_max_ms": 601.4480590820312,
+    "solve_std_ms": 34.26757385418238,
+    "solve_p95_ms": 77.56419181823729,
+    "solve_p99_ms": 126.37578010558993,
+    "success_rate_pct": 100.0,
+    "realtime_margin_pct": 22.43580818176271
+  },
+  "completion": {
+    "distance_m": 111.41197485662069,
+    "path_length_m": 112.41150082346387,
+    "completion_pct": 99.11083300238747,
+    "duration_s": 126.9,
+    "avg_velocity_mps": 0.8779509444966169
+  },
+  "constraints": {
+    "velocity_violations": 0,
+    "lane_violations": 0,
+    "all_satisfied": true
+  }
+}
