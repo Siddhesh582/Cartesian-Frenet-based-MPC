@@ -13,7 +13,6 @@ Warehouse robots and factory AGVs follow fixed routes but need to avoid unexpect
 | Lateral error | 0.50m RMS | 0.4% of path length |
 | Min clearance | 0.17m | Vehicle radius: 0.5m |
 | Solve time | 78ms (p95) | 22% margin at 10Hz |
-| Completion | 99.1% | Stopped 1m before goal |
 
 ## Approach
 
